@@ -1,0 +1,102 @@
+---
+author: |
+  - Eygló Ástþórsdóttir <eya19@hi.is>  
+  - Helga Björg Helgadóttir <hbh54@hi.is>
+date: 19. feb 2025
+title: "Seinna R verkefni"
+output: 
+  rmdformats::downcute:
+    code_folding: show
+    self_contained: true
+    thumbnails: false
+    lightbox: true
+  pkgdown:
+    as_is: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+### Library notkun:
+```{r}
+library(tidyverse)  # Fyrir gagnavinnslu
+library(readr)      # Fyrir gagnainnlestur
+library(dplyr)
+library(ggplot2)    # Búa til gröf
+library(knitr)      # Kable-töflur sem eru fallegri
+library(scales)     # Format á tölur
+library(kableExtra)
+library(tidyr)
+library(stringr)
+```
+
+# HLUTI 1
+
+## a)
+**Lesið gagnasafnið inn í R/RStudio og geymið í hlut sem ber upphafsstafi þeirra sem verkefnið vinna (ef Gréta Halldórsdóttir og Sigurður Karl Jónsson eru að vinna saman skulu þau nefna hlutinn gs).**
+
+## b)
+**Notið filter() skipunina til að velja svör frá starfandi forriturum (sjá MainBranch breytunna, "I am a developer by profession") í fullri vinnu (sjá Employment breytuna, "Employed, full-time"), vinnur annað hvort í fjarvinnu eða á staðnum (ekki hybrid, sjá RemoteWork breytuna) og frá fólki sem gefur launin sín upp í Evrum eða Dollurum (USD). Notið aðeins svör frá þessum einstaklingum það sem eftir er verkefnisins.**
+
+## c)
+**Skoðið CompTotal breytuna. Eru einhverjir augljósir útlagar í breytunni? Ef svo, hvert/hver eru gildin? Fjarlægið þessa auljósu útlaga.**
+
+## d)
+**Búið til nýja breytu sem heitir CompTotalUSD þar sem öll laun eru í dollurum.**
+**Ábending: Hér gæti verið gott að nota ifelse() skipun.**
+
+## e)
+**Veljið forritara frá þremur löndum til að vinna áfram með. Það þurfa að vera a.m.k. 300 svör frá þeim löndum sem þið vinnið með. Yfirskrifið gagnaramman í b) lið með svörum frá þessum þremur löndum. Þið eigið að nota gögn frá þessum þremur löndum það sem eftir er verkefnisins.**
+
+## f)
+**Kannið hvort að þær breytur sem þið munið nota í verkefninu séu rétt skráðar (talnabreytur eða flokkabreytur). Breytið þeim flokkabreytum sem þið ætlið að nota í factor breytur ef þær eru skráðar sem chr (þið gætuð þurft að koma aftur að þessum lið síðar í verkefninu þegar þið eruð búin að ákveða hvaða breytur þið ætlið að vinna með). Endurskýrið flokkana í EdLevel breytunni þannig að nöfnin verði styttri og á íslensku. Endurskýrið einnig nöfnin á löndunum þannig að þau verði á íslensku.**
+
+## g) 
+**Hugsum okkur nú að svarendurnir gagnarammanum ykkar sé þýðið ykkar. Nú ætlum við að taka úrtak úr þýðinu, 200 svarendur frá hverju landi (af löndunum þremur sem þið völduð). Það má gera á eftirfarandi hátt:**
+
+**set.seed(37) # þið setjið happatöluna ykkar hér inn**
+**nafn_a_gagnatoflu %>% **
+    **group_by(Country) %>%**
+    **sample_n(size = 200) -> urtak**
+
+
+# HLUTI 2
+
+## h) 
+**Búið til töflu sem sýnir fjölda svarenda frá löndunum þremur þremur eftir hvor þau vinna á staðnum eða í fjarvinnu.**
+
+## i) 
+**Búið til töflu sem sýnir hlutföll fjarvinnu og staðvinnu í löndunum þremur, það á að vera hægt að lesa hversu hátt hlutfall svarenda vinnur á staðnum og í fjarvinnu í löndunum þremur. **
+
+## j) 
+**Kannið með viðeigandi tilgátuprófi hvort hlutföll þeirra sem vinna í á staðnum séu misjöfn í löndunum þremur. Sýnið úttakið úr prófinu. Eru forsendur til að nota prófið uppfylltar? Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
+
+
+# HLUTI 3
+
+## k) 
+**Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort fólk vinni í fjarvinnu eða staðvinnu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
+
+## l) 
+**Búið til nýja breytu, starfsreynsla, sem gefur til kynna hvort svarendur hafa kóðað undir eða yfir meðaltíma sem svarendur hafa unnið við það að kóða í úrtakinu ykkar (YearsCodePro). Kallið flokkinn með lægri kóðunarreynslu laegri og hærri kóðunarreynslu haerri. Ábending: notið ifelse() til að búa til breytuna. Tilgreinið hvert úrtaksmeðaltalið fyrir fjölda ára kóðað sé.**
+
+## m) 
+**Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort kóðarar eru undir eða yfir meðalkóðunartíma. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
+
+
+# HLUTI 4
+## n) 
+**Teiknið viðeigandi mynd af breytunum CompTotalUSD og Country.**
+
+## o) 
+**Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum í löndunum þremur. Sýnið úttakið úr prófinu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið. Segði nokkur orð um hvort forsendur tilgátuprófsins séu uppfylltar. Þið þurfið ekki að prófa það með tilgátuprófi, nóg er að notast við myndrit (t.d. myndina í lið n).**
+
+## p) 
+**Teiknið viðeigandi mynd af breytunum CompTotalUSD og YearsCodePro. Segið með nokkrum orðum hvort þið teljið viðeigandi að nota einfalt línulegt aðhvarf til að lýsa sambandinu á milli breytanna.**
+
+## q) 
+**Smíðið einfalt aðhvarfslíkan sem hægt væri að nota til að spá fyrir launum út frá starfsreynslu (þetta skuluð þið gera burt séð frá niðurstöðum ykkar í p)-lið). Tilgreinið í texta hvert matið á skurðpunktinum og hallatölunni eru ásamt skýringarhlutfallinu (notið klumpakommur). Hvað spári líkanið að forritari sé með í laun eftir 5 ára starfsreynsly?**
+
+# Notkun á gerfigreind
+

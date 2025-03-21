@@ -35,22 +35,96 @@ library(stringr)
 
 ## a)
 **Lesið gagnasafnið inn í R/RStudio og geymið í hlut sem ber upphafsstafi þeirra sem verkefnið vinna (ef Gréta Halldórsdóttir og Sigurður Karl Jónsson eru að vinna saman skulu þau nefna hlutinn gs).**
+```{r}
+eh <- read_csv("https://ahj.hi.is/survey_results_public_rev.csv")
+```
 
 ## b)
 **Notið filter() skipunina til að velja svör frá starfandi forriturum (sjá MainBranch breytunna, "I am a developer by profession") í fullri vinnu (sjá Employment breytuna, "Employed, full-time"), vinnur annað hvort í fjarvinnu eða á staðnum (ekki hybrid, sjá RemoteWork breytuna) og frá fólki sem gefur launin sín upp í Evrum eða Dollurum (USD). Notið aðeins svör frá þessum einstaklingum það sem eftir er verkefnisins.**
+```{r}
+eh <- eh %>%
+  filter(MainBranch == "I am a developer by profession" &
+         Employment == "Employed, full-time")
+```
+
+### Vantar að gera meira hér.........
 
 ## c)
 **Skoðið CompTotal breytuna. Eru einhverjir augljósir útlagar í breytunni? Ef svo, hvert/hver eru gildin? Fjarlægið þessa auljósu útlaga.**
+```{r}
+# Umbreyta breytunni CompTotal í tölubreytu (numeric)
+eh$CompTotal <- as.numeric(eh$CompTotal)
+
+# Fjarlægja raðir þar sem CompTotal er NA
+eh <- eh %>% filter(!is.na(CompTotal))
+
+# Reikna fyrri fjórðung (Q1) og þriðji fjórðung (Q3) fyrir CompTotal
+Q1 <- quantile(eh$CompTotal, 0.25, na.rm = TRUE)
+Q3 <- quantile(eh$CompTotal, 0.75, na.rm = TRUE)
+
+# Reikna meðalbil (IQR = Q3 - Q1)
+IQR_value <- Q3 - Q1
+
+# Skoða uppfærðu dreifinguna fyrir CompTotal
+summary(eh$CompTotal)
+
+```
+```{r}
+# Setja niðurstaðamörk fyrir útlaga: 1.5 * IQR neðan og ofan á Q1 og Q3
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+# Fjarlægja raðir þar sem CompTotal fellur ekki innan þessa marka
+eh <- eh %>% filter(CompTotal >= lower_bound & CompTotal <= upper_bound)
+summary(eh$CompTotal)
+```
+
+### Niðurstaða:
+Já, það eru augljósir útlagar í CompTotal breytunni. Í fyrri samantektinni (áður en útlagarnir voru fjarlægðir) var max gildið 1.000e+150, sem er óraunhæft.
+Eftir að útlögunum var eytt með IQR-aðferðinni (1.5 * IQR yfir Q3 og undir Q1) lækkaði max í 280.000, sem er mun nær raunhæfum launum.
+Nú gefa gögnin mun skýrari mynd af raunverulegri launadreifingu hjá forriturum.
+
+
 
 ## d)
 **Búið til nýja breytu sem heitir CompTotalUSD þar sem öll laun eru í dollurum.**
 **Ábending: Hér gæti verið gott að nota ifelse() skipun.**
+```{r}
+eh$CompTotalUSD <- ifelse(eh$Currency == "USD", eh$CompTotal,
+                          ifelse(eh$Currency == "EUR", eh$CompTotal * 1.08, NA))  
+
+```
 
 ## e)
 **Veljið forritara frá þremur löndum til að vinna áfram með. Það þurfa að vera a.m.k. 300 svör frá þeim löndum sem þið vinnið með. Yfirskrifið gagnaramman í b) lið með svörum frá þessum þremur löndum. Þið eigið að nota gögn frá þessum þremur löndum það sem eftir er verkefnisins.**
+```{r}
+# Telja fjölda svara frá hverju landi
+country_counts <- eh %>%
+  count(Country, sort = TRUE)
+
+countries_over_300 <- country_counts %>% filter(n >= 300)
+
+selected_countries <- c("United States of America", "Germany", "France")
+
+# Yfirskrifa gagnarammann með svörum frá þessum löndum
+eh <- eh %>% filter(Country %in% selected_countries)
+```
 
 ## f)
 **Kannið hvort að þær breytur sem þið munið nota í verkefninu séu rétt skráðar (talnabreytur eða flokkabreytur). Breytið þeim flokkabreytum sem þið ætlið að nota í factor breytur ef þær eru skráðar sem chr (þið gætuð þurft að koma aftur að þessum lið síðar í verkefninu þegar þið eruð búin að ákveða hvaða breytur þið ætlið að vinna með). Endurskýrið flokkana í EdLevel breytunni þannig að nöfnin verði styttri og á íslensku. Endurskýrið einnig nöfnin á löndunum þannig að þau verði á íslensku.**
+```{r}
+eh$YearsCode <- as.numeric(eh$YearsCode)
+eh$YearsCodePro <- as.numeric(eh$YearsCodePro)
+eh$CompTotal <- as.numeric(eh$CompTotal)
+eh$CompTotalUSD <- as.numeric(eh$CompTotalUSD)
+
+eh$Country <- as.factor(eh$Country)
+eh$EdLevel <- as.factor(eh$EdLevel)
+eh$Employment <- as.factor(eh$Employment)
+eh$DevType <- as.factor(eh$DevType)
+eh$MainBranch <- as.factor(eh$MainBranch)
+```
+
+### Hér þarf mögulega að updatea.
 
 ## g) 
 **Hugsum okkur nú að svarendurnir gagnarammanum ykkar sé þýðið ykkar. Nú ætlum við að taka úrtak úr þýðinu, 200 svarendur frá hverju landi (af löndunum þremur sem þið völduð). Það má gera á eftirfarandi hátt:**

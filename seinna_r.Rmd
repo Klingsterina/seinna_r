@@ -133,6 +133,9 @@ eh$MainBranch <- as.factor(eh$MainBranch)
 **nafn_a_gagnatoflu %>% **
     **group_by(Country) %>%**
     **sample_n(size = 200) -> urtak**
+```{r}
+
+```
 
 
 # HLUTI 2

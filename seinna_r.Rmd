@@ -217,21 +217,29 @@ urtak %>%
 
 ```{r}
 # Boxplot fyrir laun eftir landi
-boxplot(CompTotalUSD ~ Country,
-        data = df,
-        main = "Laun forritara eftir landi",
-        xlab = "Land",
-        ylab = "Heildarlaun (USD)",
-        col = "lightblue",
-        las = 2)
-
+ggplot(eh, aes(x = Country, y = CompTotalUSD)) + 
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(
+    title = "Laun forritara eftir landi",
+    x = "Land",
+    y = "Heildarlaun (USD)"
+  ) +
+  scale_y_continuous(labels = label_number(big.mark = ".")) +
+  theme(
+    axis.text.x = element_text(angle = 0),
+    plot.title = element_text(hjust = 0.5, face="bold", size=16, margin = margin(b = 10))
+  )
 ```
 
 ## o) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum í löndunum þremur. Sýnið úttakið úr prófinu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið. Segði nokkur orð um hvort forsendur tilgátuprófsins séu uppfylltar. Þið þurfið ekki að prófa það með tilgátuprófi, nóg er að notast við myndrit (t.d. myndina í lið n).**
 
-Núlltilgáta (H0): Meðallaun eru jöfn milli allra þriggja landa
-Gagntilgáta (H1): Að minnsta kosti eitt land hefur meðallaun sem eru frábrugðin launum hinna landanna
+
+$$
+H_0: \mu_{\text{Bandaríkin}} = \mu_{\text{Þýskaland}} = \mu_{\text{Frakkland}} \\
+H_1: \text{Að minnsta kosti eitt land hefur meðallaun sem eru frábrugðin hinum.}
+$$
+
 
 ```{r}
 # Keyrum ANOVA

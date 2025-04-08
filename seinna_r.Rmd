@@ -163,6 +163,10 @@ eh$MainBranch <- as.factor(eh$MainBranch)
 ## n) 
 **Teiknið viðeigandi mynd af breytunum CompTotalUSD og Country.**
 
+```{r}
+
+```
+
 ## o) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum í löndunum þremur. Sýnið úttakið úr prófinu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið. Segði nokkur orð um hvort forsendur tilgátuprófsins séu uppfylltar. Þið þurfið ekki að prófa það með tilgátuprófi, nóg er að notast við myndrit (t.d. myndina í lið n).**
 

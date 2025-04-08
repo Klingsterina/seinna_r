@@ -93,7 +93,6 @@ Nú gefa gögnin mun skýrari mynd af raunverulegri launadreifingu hjá forritur
 ```{r}
 eh$CompTotalUSD <- ifelse(eh$Currency == "USD	United States dollar", eh$CompTotal,
                           ifelse(eh$Currency == "EUR European Euro", eh$CompTotal * 1.08, NA))  
-
 ```
 
 ## e)
@@ -194,8 +193,29 @@ urtak <- eh %>%
 ## n) 
 **Teiknið viðeigandi mynd af breytunum CompTotalUSD og Country.**
 
+```{r}
+# Boxplot fyrir laun eftir landi
+boxplot(CompTotalUSD ~ Country,
+        data = df,
+        main = "Laun forritara eftir landi",
+        xlab = "Land",
+        ylab = "Heildarlaun (USD)",
+        col = "lightblue",
+        las = 2)
+
+```
+
 ## o) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum í löndunum þremur. Sýnið úttakið úr prófinu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið. Segði nokkur orð um hvort forsendur tilgátuprófsins séu uppfylltar. Þið þurfið ekki að prófa það með tilgátuprófi, nóg er að notast við myndrit (t.d. myndina í lið n).**
+
+Núlltilgáta (H0): Meðallaun eru jöfn milli allra þriggja landa
+Gagntilgáta (H1): Að minnsta kosti eitt land hefur meðallaun sem eru frábrugðin launum hinna landanna
+
+```{r}
+# Keyrum ANOVA
+anova_result <- aov(CompTotalUSD ~ Country, data = eh)
+summary(anova_result)
+```
 
 ## p) 
 **Teiknið viðeigandi mynd af breytunum CompTotalUSD og YearsCodePro. Segið með nokkrum orðum hvort þið teljið viðeigandi að nota einfalt línulegt aðhvarf til að lýsa sambandinu á milli breytanna.**

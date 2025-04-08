@@ -198,6 +198,19 @@ urtak %>%
 ## j) 
 **Kannið með viðeigandi tilgátuprófi hvort hlutföll þeirra sem vinna í á staðnum séu misjöfn í löndunum þremur. Sýnið úttakið úr prófinu. Eru forsendur til að nota prófið uppfylltar? Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
 
+$$
+H_0: \text{Hlutfall þeirra sem vinna á staðnum er það sama í öllum löndum} \\
+H_1: \text{Hlutfall þeirra sem vinna á staðnum er ekki það sama í öllum löndum}
+$$
+```{r}
+tvl <- table(urtak$RemoteWork, urtak$Country)
+chisq.test(tvl)
+```
+```{r}
+p_gildi <- chisq.test(tvl)$p.value
+p_birting <- ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
+p_birting
+```
 
 # HLUTI 3
 
@@ -246,4 +259,4 @@ summary(anova_result)
 **Smíðið einfalt aðhvarfslíkan sem hægt væri að nota til að spá fyrir launum út frá starfsreynslu (þetta skuluð þið gera burt séð frá niðurstöðum ykkar í p)-lið). Tilgreinið í texta hvert matið á skurðpunktinum og hallatölunni eru ásamt skýringarhlutfallinu (notið klumpakommur). Hvað spári líkanið að forritari sé með í laun eftir 5 ára starfsreynsly?**
 
 # Notkun á gerfigreind
-
+Við notuðum chat til að hjálpa okkur finna út úr veseni í hluta 1, þar sem það var vesen með CompTotalUsd og Currency og RemoteWork, að það kom ekki nein gögn. þannig við fengum gervigreindina til að útskýra fyrir okkur hvað væri í gangi.

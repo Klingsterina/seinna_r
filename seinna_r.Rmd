@@ -43,11 +43,15 @@ eh <- read_csv("https://ahj.hi.is/survey_results_public_rev.csv")
 **Notið filter() skipunina til að velja svör frá starfandi forriturum (sjá MainBranch breytunna, "I am a developer by profession") í fullri vinnu (sjá Employment breytuna, "Employed, full-time"), vinnur annað hvort í fjarvinnu eða á staðnum (ekki hybrid, sjá RemoteWork breytuna) og frá fólki sem gefur launin sín upp í Evrum eða Dollurum (USD). Notið aðeins svör frá þessum einstaklingum það sem eftir er verkefnisins.**
 ```{r}
 eh <- eh %>%
-  filter(MainBranch == "I am a developer by profession" &
-         Employment == "Employed, full-time")
-```
+  filter(MainBranch == "I am a developer by profession",
+         Employment == "Employed, full-time",
+         RemoteWork %in% c("Remote", "In-person"),
+         Currency %in% c("USD	United States dollar", "EUR European Euro"))
+unique(eh$RemoteWork)
+"RemoteWork" %in% names(eh)
+summary(eh$RemoteWork)
 
-### Vantar að gera meira hér.........
+```
 
 ## c)
 **Skoðið CompTotal breytuna. Eru einhverjir augljósir útlagar í breytunni? Ef svo, hvert/hver eru gildin? Fjarlægið þessa auljósu útlaga.**
@@ -79,18 +83,16 @@ summary(eh$CompTotal)
 ```
 
 ### Niðurstaða:
-Já, það eru augljósir útlagar í CompTotal breytunni. Í fyrri samantektinni (áður en útlagarnir voru fjarlægðir) var max gildið 1.000e+150, sem er óraunhæft.
-Eftir að útlögunum var eytt með IQR-aðferðinni (1.5 * IQR yfir Q3 og undir Q1) lækkaði max í 280.000, sem er mun nær raunhæfum launum.
+Já, það eru augljósir útlagar í CompTotal breytunni. Í fyrri samantektinni (áður en útlagarnir voru fjarlægðir) var max gildið 1.000e+20, sem er óraunhæft.
+Eftir að útlögunum var eytt með IQR-aðferðinni (1.5 * IQR yfir Q3 og undir Q1) lækkaði max í 140.000, sem er mun nær raunhæfum launum.
 Nú gefa gögnin mun skýrari mynd af raunverulegri launadreifingu hjá forriturum.
-
-
 
 ## d)
 **Búið til nýja breytu sem heitir CompTotalUSD þar sem öll laun eru í dollurum.**
 **Ábending: Hér gæti verið gott að nota ifelse() skipun.**
 ```{r}
-eh$CompTotalUSD <- ifelse(eh$Currency == "USD", eh$CompTotal,
-                          ifelse(eh$Currency == "EUR", eh$CompTotal * 1.08, NA))  
+eh$CompTotalUSD <- ifelse(eh$Currency == "USD	United States dollar", eh$CompTotal,
+                          ifelse(eh$Currency == "EUR European Euro", eh$CompTotal * 1.08, NA))  
 
 ```
 
@@ -112,19 +114,41 @@ eh <- eh %>% filter(Country %in% selected_countries)
 ## f)
 **Kannið hvort að þær breytur sem þið munið nota í verkefninu séu rétt skráðar (talnabreytur eða flokkabreytur). Breytið þeim flokkabreytum sem þið ætlið að nota í factor breytur ef þær eru skráðar sem chr (þið gætuð þurft að koma aftur að þessum lið síðar í verkefninu þegar þið eruð búin að ákveða hvaða breytur þið ætlið að vinna með). Endurskýrið flokkana í EdLevel breytunni þannig að nöfnin verði styttri og á íslensku. Endurskýrið einnig nöfnin á löndunum þannig að þau verði á íslensku.**
 ```{r}
-eh$YearsCode <- as.numeric(eh$YearsCode)
-eh$YearsCodePro <- as.numeric(eh$YearsCodePro)
 eh$CompTotal <- as.numeric(eh$CompTotal)
 eh$CompTotalUSD <- as.numeric(eh$CompTotalUSD)
 
 eh$Country <- as.factor(eh$Country)
-eh$EdLevel <- as.factor(eh$EdLevel)
 eh$Employment <- as.factor(eh$Employment)
-eh$DevType <- as.factor(eh$DevType)
 eh$MainBranch <- as.factor(eh$MainBranch)
 ```
 
-### Hér þarf mögulega að updatea.
+```{r}
+eh$EdLevel <- recode(eh$EdLevel,
+  "Primary/elementary school" = "Grunnskólapróf",
+  "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)" = "Framhaldsskólapróf",
+  "Some college/university study without earning a degree" = "Háskólanám án gráðu",
+  "Associate degree (A.A., A.S., etc.)" = "Diplóma",
+  "Bachelor’s degree (B.A., B.S., B.Eng., etc.)" = "Bakkalárgráða",
+  "Master’s degree (M.A., M.S., M.Eng., MBA, etc.)" = "Meistaragráða",
+  "Professional degree (JD, MD, etc.)" = "Faggráða",
+  "Other doctoral degree (Ph.D., Ed.D., etc.)" = "Doktorspróf",
+  "Something else" = "Annað"
+)
+# Skilgreina rétta röð fyrir menntastigin
+education_levels_order <- c("Grunnskólapróf", "Framhaldsskólapróf", "Háskólanám án gráðu", "Diplóma", "Bakkalárgráða", "Meistaragráða", "Doktorspróf", "Annað")
+
+# Raða menntastigunum
+eh$EdLevel <- factor(eh$EdLevel, levels = education_levels_order)
+```
+
+```{r}
+eh$Country <- recode(eh$Country,
+                     "United States of America" = "Bandaríkin",
+                     "Germany" = "Þýskaland",
+                     "France" = "Frakkland")
+kable(table(eh$Country), col.names = c("Land", "Fjöldi svarenda"))
+
+```
 
 ## g) 
 **Hugsum okkur nú að svarendurnir gagnarammanum ykkar sé þýðið ykkar. Nú ætlum við að taka úrtak úr þýðinu, 200 svarendur frá hverju landi (af löndunum þremur sem þið völduð). Það má gera á eftirfarandi hátt:**
@@ -133,6 +157,13 @@ eh$MainBranch <- as.factor(eh$MainBranch)
 **nafn_a_gagnatoflu %>% **
     **group_by(Country) %>%**
     **sample_n(size = 200) -> urtak**
+    
+```{r}
+set.seed(37)
+urtak <- eh %>%
+  group_by(Country) %>%
+  sample_n(size = 200)
+```
 
 
 # HLUTI 2

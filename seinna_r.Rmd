@@ -91,14 +91,8 @@ Nú gefa gögnin mun skýrari mynd af raunverulegri launadreifingu hjá forritur
 **Búið til nýja breytu sem heitir CompTotalUSD þar sem öll laun eru í dollurum.**
 **Ábending: Hér gæti verið gott að nota ifelse() skipun.**
 ```{r}
-<<<<<<< HEAD
-eh$CompTotalUSD <- ifelse(eh$Currency == "USD", eh$CompTotal,
-                          ifelse(eh$Currency == "EUR", eh$CompTotal * 1.08, NA))  
-=======
 eh$CompTotalUSD <- ifelse(eh$Currency == "USD	United States dollar", eh$CompTotal,
                           ifelse(eh$Currency == "EUR European Euro", eh$CompTotal * 1.08, NA))  
-
->>>>>>> b41874471d4b7721ca12f76a8cb98c3aa133c603
 ```
 
 ## e)

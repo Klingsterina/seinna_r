@@ -163,6 +163,7 @@ set.seed(37)
 urtak <- eh %>%
   group_by(Country) %>%
   sample_n(size = 200)
+
 ```
 
 
@@ -170,9 +171,30 @@ urtak <- eh %>%
 
 ## h) 
 **Búið til töflu sem sýnir fjölda svarenda frá löndunum þremur þremur eftir hvor þau vinna á staðnum eða í fjarvinnu.**
+```{r}
+
+urtak %>%
+  group_by(Country, RemoteWork) %>%
+  summarise(Fjoldi = n(), .groups = "drop") %>%
+  pivot_wider(names_from = RemoteWork, values_from = Fjoldi, values_fill = 0) %>%
+  kable(col.names = c("Land", "Fjarvinna", "Staðvinna")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
 
 ## i) 
 **Búið til töflu sem sýnir hlutföll fjarvinnu og staðvinnu í löndunum þremur, það á að vera hægt að lesa hversu hátt hlutfall svarenda vinnur á staðnum og í fjarvinnu í löndunum þremur. **
+```{r}
+urtak %>%
+  group_by(Country, RemoteWork) %>%
+  summarise(Fjoldi = n(), .groups = "drop") %>%
+  group_by(Country) %>%
+  mutate(Hlutfall = round(Fjoldi / sum(Fjoldi) * 100, 1)) %>%
+  select(-Fjoldi) %>%  # Fjarlægja Fjoldi svo hann trufli ekki
+  pivot_wider(names_from = RemoteWork, values_from = Hlutfall, values_fill = 0) %>%
+  kable(col.names = c("Land", "Staðvinna (%)", "Fjarvinna (%)")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
 
 ## j) 
 **Kannið með viðeigandi tilgátuprófi hvort hlutföll þeirra sem vinna í á staðnum séu misjöfn í löndunum þremur. Sýnið úttakið úr prófinu. Eru forsendur til að nota prófið uppfylltar? Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**

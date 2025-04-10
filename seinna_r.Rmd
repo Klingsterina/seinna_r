@@ -114,6 +114,7 @@ eh <- eh %>% filter(Country %in% selected_countries)
 ```{r}
 eh$CompTotal <- as.numeric(eh$CompTotal)
 eh$CompTotalUSD <- as.numeric(eh$CompTotalUSD)
+eh$YearsCodePro <- as.numeric(eh$YearsCodePro)
 
 eh$Country <- as.factor(eh$Country)
 eh$Employment <- as.factor(eh$Employment)
@@ -193,6 +194,7 @@ $$
 H_0: \text{Hlutfall þeirra sem vinna á staðnum er það sama í öllum löndum} \\
 H_1: \text{Hlutfall þeirra sem vinna á staðnum er ekki það sama í öllum löndum}
 $$
+
 ```{r}
 tvl <- table(urtak$RemoteWork, urtak$Country)
 chisq.test(tvl)
@@ -209,12 +211,71 @@ ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
 ## k) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort fólk vinni í fjarvinnu eða staðvinnu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
 
+$$
+H_0: \mu\text{ Fjarvinna = }\mu\text{ Staðvinna}\\
+H_1: \mu\text{ Fjarvinna }\neq\mu\text{ Staðvinna}
+$$
+
+```{r}
+k_ttest <- t.test(CompTotalUSD ~ RemoteWork, data = urtak)
+k_ttest
+```
+```{r}
+# Byrting gagna:
+k_p <- k_ttest$p.value
+# snyrtilega uppsett p
+k_p_snyrt <- ifelse(k_p < 0.001, "<0,001", format(round(k_p, 3), decimal.mark = ","))
+```
+**Við athuguðum hvort marktækur munur væri á meðallaunum eftir því hvort fólk vinni í fjarvinnu eða staðvinnu.** Meðaltöl voru borin saman með t-prófi og prófstærðin var t = `r round(k_ttest$statistic, 2)` með p-gildi = `r k_p_snyrt`. Þar sem p-gildið var < 0,05, höfnum við núlltilgátunni og ályktum að munur sé á launum eftir vinnufyrirkomulagi.
+
 ## l) 
 **Búið til nýja breytu, starfsreynsla, sem gefur til kynna hvort svarendur hafa kóðað undir eða yfir meðaltíma sem svarendur hafa unnið við það að kóða í úrtakinu ykkar (YearsCodePro). Kallið flokkinn með lægri kóðunarreynslu laegri og hærri kóðunarreynslu haerri. Ábending: notið ifelse() til að búa til breytuna. Tilgreinið hvert úrtaksmeðaltalið fyrir fjölda ára kóðað sé.**
+```{r}
+# Reikna meðaltal starfsreynslu í úrtakinu (sleppum NA)
+meðaltal <- mean(urtak$YearsCodePro, na.rm = TRUE)
+
+# Búa til breytuna "starfsreynsla"
+urtak <- urtak %>%
+  mutate(starfsreynsla = ifelse(YearsCodePro < meðaltal, "lægri", "hærri"))
+
+# Skoða niðurstöðuna
+table(urtak$starfsreynsla)
+meðaltal
+```
+**Við reiknuðum meðaltal breytunnar YearsCodePro fyrir úrtakið okkar.** 
+Meðaltalið reyndist vera `r round(meðaltal, 1)` ár.
 
 ## m) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort kóðarar eru undir eða yfir meðalkóðunartíma. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
 
+$$
+H_0: \mu\text{ lægri= }\mu\text{ hærri}\\
+H_1: \mu\text{ lægri}\neq\mu\text{ hærri}
+$$
+```{r}
+# filtera út NA gildi
+urtak_m <- urtak %>% filter(!is.na(CompTotalUSD), !is.na(starfsreynsla))
+
+m_ttest <- t.test(urtak$CompTotalUSD ~ starfsreynsla, data = urtak_m)
+
+m_ttest
+```
+```{r}
+m_p <- m_ttest$p.value
+m_p_snyrt <- ifelse(m_p < 0.001, "<0,001", format(round(m_p, 3), decimal.mark = ","))
+m_p_snyrt
+```
+**Við athuguðum hvort marktækur munur væri á meðallaunum (CompTotalUSD) eftir því hvort svarendur eru með hærri eða lægri starfsreynslu miðað við meðaltal fjölda ára í kóðun.**
+
+### T-prófið gaf:
+
+- Prófstærð t = `r round(m_ttest$statistic, 2)`
+
+- Frígráður = `r round(m_ttest$parameter)`
+
+- P-gildi = `r m_p_snyrt`
+
+Þar sem p-gildið er < 0,05 höfnum við núlltilgátunni. Við ályktum að starfsreynsla hafi marktæk áhrif á laun forritara í úrtakinu.
 
 # HLUTI 4
 ## n) 

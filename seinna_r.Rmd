@@ -50,7 +50,6 @@ eh <- eh %>%
 unique(eh$RemoteWork)
 "RemoteWork" %in% names(eh)
 summary(eh$RemoteWork)
-
 ```
 
 ## c)
@@ -84,7 +83,7 @@ summary(eh$CompTotal)
 
 ### Niðurstaða:
 Já, það eru augljósir útlagar í CompTotal breytunni. Í fyrri samantektinni (áður en útlagarnir voru fjarlægðir) var max gildið 1.000e+20, sem er óraunhæft.
-Eftir að útlögunum var eytt með IQR-aðferðinni (1.5 * IQR yfir Q3 og undir Q1) lækkaði max í 140.000, sem er mun nær raunhæfum launum.
+Eftir að útlögunum var eytt með IQR-aðferðinni (1.5 * IQR yfir Q3 og undir Q1) lækkaði max í 316.800, sem er mun nær raunhæfum launum.
 Nú gefa gögnin mun skýrari mynd af raunverulegri launadreifingu hjá forriturum.
 
 ## d)
@@ -145,18 +144,12 @@ eh$Country <- recode(eh$Country,
                      "United States of America" = "Bandaríkin",
                      "Germany" = "Þýskaland",
                      "France" = "Frakkland")
-kable(table(eh$Country), col.names = c("Land", "Fjöldi svarenda"))
-
+kable(table(eh$Country), col.names = c("Land", "Fjöldi svarenda")) %>%
+  kable_styling(full_width = FALSE, position = "left")
 ```
 
 ## g) 
-**Hugsum okkur nú að svarendurnir gagnarammanum ykkar sé þýðið ykkar. Nú ætlum við að taka úrtak úr þýðinu, 200 svarendur frá hverju landi (af löndunum þremur sem þið völduð). Það má gera á eftirfarandi hátt:**
-
-**set.seed(37) # þið setjið happatöluna ykkar hér inn**
-**nafn_a_gagnatoflu %>% **
-    **group_by(Country) %>%**
-    **sample_n(size = 200) -> urtak**
-    
+**Hugsum okkur nú að svarendurnir gagnarammanum ykkar sé þýðið ykkar. Nú ætlum við að taka úrtak úr þýðinu, 200 svarendur frá hverju landi (af löndunum þremur sem þið völduð).**
 ```{r}
 set.seed(37)
 urtak <- eh %>%
@@ -165,13 +158,11 @@ urtak <- eh %>%
 
 ```
 
-
 # HLUTI 2
 
 ## h) 
 **Búið til töflu sem sýnir fjölda svarenda frá löndunum þremur þremur eftir hvor þau vinna á staðnum eða í fjarvinnu.**
 ```{r}
-
 urtak %>%
   group_by(Country, RemoteWork) %>%
   summarise(Fjoldi = n(), .groups = "drop") %>%
@@ -208,9 +199,10 @@ chisq.test(tvl)
 ```
 ```{r}
 p_gildi <- chisq.test(tvl)$p.value
-p_birting <- ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
-p_birting
+ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
 ```
+**Prófstærðin er 𝛘² = 19.82 með frígráður df = 2 og p-gildi = <0,001.**
+**Þar sem p-gildið er < 0,05 höfnum við núlltilgátunni og ályktum að hlutfall staðvinnu sé mismunandi milli landanna.**
 
 # HLUTI 3
 

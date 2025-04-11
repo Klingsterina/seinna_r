@@ -24,9 +24,9 @@ library(tidyverse)  # Fyrir gagnavinnslu
 library(readr)      # Fyrir gagnainnlestur
 library(dplyr)
 library(ggplot2)    # Búa til gröf
-library(knitr)      # Kable-töflur sem eru fallegri
+library(knitr)      # Til að knitta í HTMl skjal
 library(scales)     # Format á tölur
-library(kableExtra)
+library(kableExtra) # Kable-töflur sem eru fallegri
 library(tidyr)
 library(stringr)
 ```
@@ -52,28 +52,28 @@ eh <- eh %>%
 ## c)
 **Skoðið CompTotal breytuna. Eru einhverjir augljósir útlagar í breytunni? Ef svo, hvert/hver eru gildin? Fjarlægið þessa auljósu útlaga.**
 ```{r}
-# Umbreyta breytunni CompTotal í tölubreytu (numeric)
+# Umbreytum breytunni CompTotal í tölubreytu (numeric)
 eh$CompTotal <- as.numeric(eh$CompTotal)
 
-# Fjarlægja raðir þar sem CompTotal er NA
+# Fjarlægjum raðir þar sem CompTotal er NA
 eh <- eh %>% filter(!is.na(CompTotal))
 
-# Reikna fyrri fjórðung (Q1) og þriðji fjórðung (Q3) fyrir CompTotal
+# Reiknum fyrri fjórðung (Q1) og þriðja fjórðung (Q3) fyrir CompTotal
 Q1 <- quantile(eh$CompTotal, 0.25, na.rm = TRUE)
 Q3 <- quantile(eh$CompTotal, 0.75, na.rm = TRUE)
 
-# Reikna meðalbil (IQR = Q3 - Q1)
+# Reiknum meðalbil (IQR = Q3 - Q1)
 IQR_value <- Q3 - Q1
 
-# Skoða uppfærðu dreifinguna fyrir CompTotal
+# Skoðum uppfærðu dreifinguna fyrir CompTotal
 summary(eh$CompTotal)
-
 ```
 ```{r}
-# Setja niðurstaðamörk fyrir útlaga: 1.5 * IQR neðan og ofan á Q1 og Q3
+# Setjum niðurstaðamörk fyrir útlaga: 1.5 * IQR neðan og ofan á Q1 og Q3
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
-# Fjarlægja raðir þar sem CompTotal fellur ekki innan þessa marka
+
+# Fjarlægjum raðir þar sem CompTotal fellur ekki innan þessa marka
 eh <- eh %>% filter(CompTotal >= lower_bound & CompTotal <= upper_bound)
 summary(eh$CompTotal)
 ```
@@ -94,7 +94,7 @@ eh$CompTotalUSD <- ifelse(eh$Currency == "USD	United States dollar", eh$CompTota
 ## e)
 **Veljið forritara frá þremur löndum til að vinna áfram með. Það þurfa að vera a.m.k. 300 svör frá þeim löndum sem þið vinnið með. Yfirskrifið gagnaramman í b) lið með svörum frá þessum þremur löndum. Þið eigið að nota gögn frá þessum þremur löndum það sem eftir er verkefnisins.**
 ```{r}
-# Telja fjölda svara frá hverju landi
+# Teljum fjölda svara frá hverju landi
 country_counts <- eh %>%
   count(Country, sort = TRUE)
 
@@ -102,7 +102,7 @@ countries_over_300 <- country_counts %>% filter(n >= 300)
 
 selected_countries <- c("United States of America", "Germany", "France")
 
-# Yfirskrifa gagnarammann með svörum frá þessum löndum
+# Yfirskrifum gagnarammann með svörum frá þessum löndum
 eh <- eh %>% filter(Country %in% selected_countries)
 ```
 
@@ -203,10 +203,10 @@ j_p_snyrt <- ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal
 
 ### Útkoma:
 - Prófstærðin er 𝛘² = `r round(j_test$statistic, 2)`
-- frígráður df = `r round(j_test$parameter)`
-- p-gildi = `r j_p_snyrt`.
+- Frígráður df = `r round(j_test$parameter)`
+- P-gildi = `r j_p_snyrt`.
 
-**Þar sem p-gildið er < 0,05 höfnum við núlltilgátunni og ályktum að hlutfall staðvinnu sé mismunandi milli landanna.**
+Þar sem p-gildið er < 0,05 höfnum við núlltilgátunni og ályktum að hlutfall staðvinnu sé mismunandi milli landanna.
 
 # HLUTI 3
 
@@ -214,8 +214,8 @@ j_p_snyrt <- ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort fólk vinni í fjarvinnu eða staðvinnu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
 
 $$
-H_0: \mu\text{ Fjarvinna = }\mu\text{ Staðvinna}\\
-H_1: \mu\text{ Fjarvinna }\neq\mu\text{ Staðvinna}
+H_0: \mu_{\text{fjarvinna}} = \mu_{\text{staðvinna}}\\
+H_1: \mu_{\text{fjarvinna}} \neq \mu_{\text{staðvinna}}
 $$
 
 ```{r}
@@ -223,41 +223,43 @@ k_ttest <- t.test(CompTotalUSD ~ RemoteWork, data = urtak)
 k_ttest
 ```
 ```{r}
-# Byrting gagna:
+# Birting gagna
 k_p <- k_ttest$p.value
-# snyrtilega uppsett p
+
+# Snyrtilega uppsett p
 k_p_snyrt <- ifelse(k_p < 0.001, "<0,001", format(round(k_p, 3), decimal.mark = ","))
 ```
-**Við athuguðum hvort marktækur munur væri á meðallaunum eftir því hvort fólk vinni í fjarvinnu eða staðvinnu.** 
+
+Við athuguðum hvort marktækur munur væri á meðallaunum eftir því hvort fólk ynni í fjarvinnu eða staðvinnu.
 - Meðaltöl voru borin saman með t-prófi og prófstærðin var t = `r round(k_ttest$statistic, 2)` með p-gildi = `r k_p_snyrt`. 
 - Þar sem p-gildið var < 0,05, höfnum við núlltilgátunni og ályktum að munur sé á launum eftir vinnufyrirkomulagi.
 
 ## l) 
 **Búið til nýja breytu, starfsreynsla, sem gefur til kynna hvort svarendur hafa kóðað undir eða yfir meðaltíma sem svarendur hafa unnið við það að kóða í úrtakinu ykkar (YearsCodePro). Kallið flokkinn með lægri kóðunarreynslu laegri og hærri kóðunarreynslu haerri. Ábending: notið ifelse() til að búa til breytuna. Tilgreinið hvert úrtaksmeðaltalið fyrir fjölda ára kóðað sé.**
 ```{r}
-# Reikna meðaltal starfsreynslu í úrtakinu (sleppum NA)
+# Reiknum meðaltal starfsreynslu í úrtakinu (sleppum NA)
 meðaltal <- mean(urtak$YearsCodePro, na.rm = TRUE)
 
-# Búa til breytuna "starfsreynsla"
+# Búum til breytuna "starfsreynsla"
 urtak <- urtak %>%
   mutate(starfsreynsla = ifelse(YearsCodePro < meðaltal, "lægri", "hærri"))
 
-# Skoða niðurstöðuna
+# Skoðum niðurstöðuna
 table(urtak$starfsreynsla)
 meðaltal
 ```
-**Við reiknuðum meðaltal breytunnar YearsCodePro fyrir úrtakið okkar.** 
+Við reiknuðum meðaltal breytunnar YearsCodePro fyrir úrtakið okkar.
 Meðaltalið reyndist vera `r round(meðaltal, 1)` ár.
 
 ## m) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum eftir því hvort kóðarar eru undir eða yfir meðalkóðunartíma. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið.**
 
 $$
-H_0: \mu\text{ lægri= }\mu\text{ hærri}\\
-H_1: \mu\text{ lægri}\neq\mu\text{ hærri}
+H_0: \mu_{\text{ lægri }} = \mu_{\text{ hærri}}\\
+H_1: \mu_{\text{ lægri}} \neq \mu_{\text{ hærri}}
 $$
 ```{r}
-# filtera út NA gildi
+# Síum út NA gildi
 urtak_m <- urtak %>% filter(!is.na(CompTotalUSD), !is.na(starfsreynsla))
 
 m_ttest <- t.test(urtak$CompTotalUSD ~ starfsreynsla, data = urtak_m)
@@ -269,7 +271,7 @@ m_p <- m_ttest$p.value
 m_p_snyrt <- ifelse(m_p < 0.001, "<0,001", format(round(m_p, 3), decimal.mark = ","))
 m_p_snyrt
 ```
-**Við athuguðum hvort marktækur munur væri á meðallaunum (CompTotalUSD) eftir því hvort svarendur eru með hærri eða lægri starfsreynslu miðað við meðaltal fjölda ára í kóðun.**
+Við athuguðum hvort marktækur munur væri á meðallaunum (CompTotalUSD) eftir því hvort svarendur séu með hærri eða lægri starfsreynslu miðað við meðaltal fjölda ára í kóðun.
 
 ### T-prófið gaf:
 
@@ -365,4 +367,4 @@ spa_eftir_5ar
 Líkanið spáir því að forritari verði með `r sprintf("%.0f", spa_eftir_5ar)` dollara í árslaun eftir 5 ára starfsreynslu.
 
 # Notkun á gervigreind
-Við notuðum chat til að hjálpa okkur finna út úr veseni í hluta 1, þar sem það var vesen með CompTotalUsd og Currency og RemoteWork, að það kom ekki nein gögn. þannig við fengum gervigreindina til að útskýra fyrir okkur hvað væri í gangi.
+Við notuðum ChatGPT til að hjálpa okkur að finna út úr veseni í hluta 1. Við lentum í veseni með CompTotalUsd, Currency og RemoteWork, og það komu ekki nein gögn upp við keyrslu. Við fengum gervigreindina til að útskýra fyrir okkur hvað væri að valda villunni og náðum á endanum að leysa úr málunum.

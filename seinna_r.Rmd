@@ -300,24 +300,65 @@ ggplot(urtak, aes(x = Country, y = CompTotalUSD)) +
 ## o) 
 **Kannið með viðeigandi tilgátuprófi hvort munur sé á meðallaunum í löndunum þremur. Sýnið úttakið úr prófinu. Setjið tilgáturnar fram, tilgreinið gildið á prófstærðinni, p-gildið og hvaða ályktun þið dragið. Segði nokkur orð um hvort forsendur tilgátuprófsins séu uppfylltar. Þið þurfið ekki að prófa það með tilgátuprófi, nóg er að notast við myndrit (t.d. myndina í lið n).**
 
-
 $$
 H_0: \mu_{\text{Bandaríkin}} = \mu_{\text{Þýskaland}} = \mu_{\text{Frakkland}} \\
-H_1: \text{Að minnsta kosti eitt land hefur meðallaun sem eru frábrugðin hinum.}
+H_1: \text{Að minnsta kosti eitt land hefur meðallaun sem eru frábrugðin hinum löndunum.}
 $$
 
-
 ```{r}
-# Keyrum ANOVA
-anova_result <- aov(CompTotalUSD ~ Country, data = urtak)
+# Slökkvum á 0e+00 vísindalegum rithætti á tölum
+options(scipen = 999, digits = 2)
+
+# Keyrum ANOVA próf
+anova_result <- aov(CompTotalUSD ~ Country, data = eh)
 summary(anova_result)
 ```
+Við fáum að gildið á prófstærðinni sé `r round(summary(anova_result)[[1]][["F value"]][1], 2)`, og að p-gildið sé ~`r format(round(summary(anova_result)[[1]][["Pr(>F)"]][1], 4), nsmall = 4)`.
+
+Þar sem p-gildið er mjög lágt (< 0.05) höfnum við núlltilgátunni og ályktum að meðallaun a.m.k. eins lands séu frábrugðin hinum löndunum. 
+
+Þetta getum við staðfest sjónrænt með því að skoða myndritið í n-lið, en á þeirri mynd sést að meðallaun forritara eru töluvert hærri í Bandaríkjunum miðað við Frakkland og Þýskaland.
+
 
 ## p) 
 **Teiknið viðeigandi mynd af breytunum CompTotalUSD og YearsCodePro. Segið með nokkrum orðum hvort þið teljið viðeigandi að nota einfalt línulegt aðhvarf til að lýsa sambandinu á milli breytanna.**
 
-## q) 
-**Smíðið einfalt aðhvarfslíkan sem hægt væri að nota til að spá fyrir launum út frá starfsreynslu (þetta skuluð þið gera burt séð frá niðurstöðum ykkar í p)-lið). Tilgreinið í texta hvert matið á skurðpunktinum og hallatölunni eru ásamt skýringarhlutfallinu (notið klumpakommur). Hvað spári líkanið að forritari sé með í laun eftir 5 ára starfsreynsly?**
+Setjum upp punktarit fyrir breyturnar CompTotalUSD og YearsCodePro til að skoða dreifinguna:
 
-# Notkun á gerfigreind
+```{r}
+ggplot(eh, aes(x = YearsCodePro, y = CompTotalUSD)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  scale_y_continuous(labels = label_number(big.mark = ".", decimal.mark = ",")) +
+  labs(x = "Fjöldi ára í atvinnukóðun",
+       y = "Heildarlaun í dollurum (USD)",
+       title = "Samband milli atvinnureynslu og launa"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+Þótt það sé stranglega tekið hægt að nota einfalt línulegt aðhvarf mælum við gegn því eftir að hafa séð punktaritið. 
+
+Í fyrsta lagi er mjög mikil dreifing á gögnunum fyrir öll reynslustig á atvinnumarkaði. Það eru einnig margir útlagar á öllum reynslustigum. Punktarnir eru að okkar mati ekki nógu þyrptir í kringum aðhvarfslínuna til að geta samviskusamlega kallað sambandið línulegt.
+
+## q) 
+**Smíðið einfalt aðhvarfslíkan sem hægt væri að nota til að spá fyrir launum út frá starfsreynslu (þetta skuluð þið gera burt séð frá niðurstöðum ykkar í p)-lið). Tilgreinið í texta hvert matið á skurðpunktinum og hallatölunni eru ásamt skýringarhlutfallinu (notið klumpakommur). Hvað spáir líkanið að forritari sé með í laun eftir 5 ára starfsreynslu?**
+
+```{r}
+# Notum einfalt línulegt aðhvarf
+adhvarf <- lm(CompTotalUSD ~ YearsCodePro, data = eh)
+summary_adhvarf <- summary(adhvarf)
+
+# Skoðum niðurstöður
+summary_adhvarf
+```
+Fáum að skurðpunkturinn sé `r summary_adhvarf$coefficients[1, 1]`, hallatalan sé `r summary_adhvarf$coefficients[2, 1]`, og skýringarhlutfallið sé `r summary_adhvarf$r.squared`.
+
+```{r}
+spa_eftir_5ar <- predict(adhvarf, newdata = data.frame(YearsCodePro = 5))
+spa_eftir_5ar
+```
+
+Líkanið spáir því að forritari verði með `r sprintf("%.0f", spa_eftir_5ar)` dollara í árslaun eftir 5 ára starfsreynslu.
+
+# Notkun á gervigreind
 Við notuðum chat til að hjálpa okkur finna út úr veseni í hluta 1, þar sem það var vesen með CompTotalUsd og Currency og RemoteWork, að það kom ekki nein gögn. þannig við fengum gervigreindina til að útskýra fyrir okkur hvað væri í gangi.

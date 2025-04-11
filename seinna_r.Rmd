@@ -2,7 +2,7 @@
 author: |
   - Eygló Ástþórsdóttir <eya19@hi.is>  
   - Helga Björg Helgadóttir <hbh54@hi.is>
-date: 19. feb 2025
+date: 10. Apríl 2025
 title: "Seinna R verkefni"
 output: 
   rmdformats::downcute:
@@ -47,9 +47,6 @@ eh <- eh %>%
          Employment == "Employed, full-time",
          RemoteWork %in% c("Remote", "In-person"),
          Currency %in% c("USD	United States dollar", "EUR European Euro"))
-unique(eh$RemoteWork)
-"RemoteWork" %in% names(eh)
-summary(eh$RemoteWork)
 ```
 
 ## c)
@@ -115,6 +112,7 @@ eh <- eh %>% filter(Country %in% selected_countries)
 eh$CompTotal <- as.numeric(eh$CompTotal)
 eh$CompTotalUSD <- as.numeric(eh$CompTotalUSD)
 eh$YearsCodePro <- as.numeric(eh$YearsCodePro)
+eh$RemoteWork <- as.factor(eh$RemoteWork)
 
 eh$Country <- as.factor(eh$Country)
 eh$Employment <- as.factor(eh$Employment)
@@ -176,15 +174,13 @@ urtak %>%
 **Búið til töflu sem sýnir hlutföll fjarvinnu og staðvinnu í löndunum þremur, það á að vera hægt að lesa hversu hátt hlutfall svarenda vinnur á staðnum og í fjarvinnu í löndunum þremur. **
 ```{r}
 urtak %>%
-  group_by(Country, RemoteWork) %>%
-  summarise(Fjoldi = n(), .groups = "drop") %>%
+  count(Country, RemoteWork) %>%
   group_by(Country) %>%
-  mutate(Hlutfall = round(Fjoldi / sum(Fjoldi) * 100, 1)) %>%
-  select(-Fjoldi) %>%  # Fjarlægja Fjoldi svo hann trufli ekki
+  mutate(Hlutfall = round(n / sum(n) * 100, 1)) %>%
+  select(-n) %>%
   pivot_wider(names_from = RemoteWork, values_from = Hlutfall, values_fill = 0) %>%
   kable(col.names = c("Land", "Staðvinna (%)", "Fjarvinna (%)")) %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
-
 ```
 
 ## j) 
@@ -196,14 +192,20 @@ H_1: \text{Hlutfall þeirra sem vinna á staðnum er ekki það sama í öllum l
 $$
 
 ```{r}
-tvl <- table(urtak$RemoteWork, urtak$Country)
-chisq.test(tvl)
+j_table <- table(urtak$RemoteWork, urtak$Country)
+j_test <- chisq.test(j_table)
+j_test
 ```
 ```{r}
-p_gildi <- chisq.test(tvl)$p.value
-ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
+p_gildi <- j_test$p.value
+j_p_snyrt <- ifelse(p_gildi < 0.001, "<0,001", format(round(p_gildi, 3), decimal.mark = ","))
 ```
-Prófstærðin er 𝛘² = 19.82 með frígráður df = 2 og p-gildi = <0,001.
+
+### Útkoma:
+- Prófstærðin er 𝛘² = `r round(j_test$statistic, 2)`
+- Frígráður df = `r round(j_test$parameter)`
+- P-gildi = `r j_p_snyrt`.
+
 Þar sem p-gildið er < 0,05 höfnum við núlltilgátunni og ályktum að hlutfall staðvinnu sé mismunandi milli landanna.
 
 # HLUTI 3
@@ -227,7 +229,10 @@ k_p <- k_ttest$p.value
 # Snyrtilega uppsett p
 k_p_snyrt <- ifelse(k_p < 0.001, "<0,001", format(round(k_p, 3), decimal.mark = ","))
 ```
-Við athuguðum hvort marktækur munur væri á meðallaunum eftir því hvort fólk ynni í fjarvinnu eða staðvinnu. Meðaltöl voru borin saman með t-prófi og prófstærðin var t = `r round(k_ttest$statistic, 2)` með p-gildi = `r k_p_snyrt`. Þar sem p-gildið var < 0,05, höfnum við núlltilgátunni og ályktum að munur sé á launum eftir vinnufyrirkomulagi.
+
+Við athuguðum hvort marktækur munur væri á meðallaunum eftir því hvort fólk ynni í fjarvinnu eða staðvinnu.
+- Meðaltöl voru borin saman með t-prófi og prófstærðin var t = `r round(k_ttest$statistic, 2)` með p-gildi = `r k_p_snyrt`. 
+- Þar sem p-gildið var < 0,05, höfnum við núlltilgátunni og ályktum að munur sé á launum eftir vinnufyrirkomulagi.
 
 ## l) 
 **Búið til nýja breytu, starfsreynsla, sem gefur til kynna hvort svarendur hafa kóðað undir eða yfir meðaltíma sem svarendur hafa unnið við það að kóða í úrtakinu ykkar (YearsCodePro). Kallið flokkinn með lægri kóðunarreynslu laegri og hærri kóðunarreynslu haerri. Ábending: notið ifelse() til að búa til breytuna. Tilgreinið hvert úrtaksmeðaltalið fyrir fjölda ára kóðað sé.**
